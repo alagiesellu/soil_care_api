@@ -1,6 +1,6 @@
 from flask import Flask, flash, request, redirect
 
-from vendors.auth import check_pin_against_phone
+from vendors.auth import check_pin_against_phone, check_phone
 from vendors.predictor import make_predictions
 from vendors.utilities import save_file
 
@@ -15,6 +15,9 @@ def login():
 
     if None not in (pin, phone):
         return check_pin_against_phone(app, pin, phone)
+
+    elif None not in phone:
+        return check_phone(app, phone)
 
     return None
 

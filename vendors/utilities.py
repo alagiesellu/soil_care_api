@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from flask import abort
 from vendors.predictor import prepare_image
@@ -27,7 +28,9 @@ def save_file(file):
 
     if file and allowed_file(file.filename):
 
-        filename = secure_filename(file.filename)
+        date = datetime.now()
+
+        filename = str(date) . secure_filename(file.filename)
 
         file_data = file.read()
 

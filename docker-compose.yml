@@ -1,8 +1,8 @@
 version: "3"
 services:
-  web:
+  soil_care_web:
     build: .
     ports:
-      - "7007:80"
-    volumes:
-      - .:/code
+      - "8000:5000"
+  redis:
+    image: "redis:alpine"

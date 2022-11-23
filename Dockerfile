@@ -1,13 +1,19 @@
 FROM python:3.10-alpine
+
 WORKDIR /code
 
-RUN apk --update --upgrade add --no-cache  gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
 
-RUN python -m pip install --upgrade pip
+RUN apk add --no-cache gcc musl-dev linux-headers
+
 COPY requirements.txt requirements.txt
+
+RUN pip install --upgrade pip
+
 RUN pip install -r requirements.txt
 
-EXPOSE 7007
-
+EXPOSE 5000
 COPY . .
-CMD [ "python", "app.py" ]
+
+CMD ["flask", "run"]

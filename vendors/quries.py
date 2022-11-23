@@ -3,6 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
+def add_record(record):
+    db.session.add(record)
+    db.session.commit()
+
+
 def create_db(_app):
 
     with _app.app_context():
