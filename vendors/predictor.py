@@ -1,33 +1,65 @@
-import numpy
+import tensorflow
 import tensorflow as tf
 from tensorflow import keras
+from keras.preprocessing import image
 from PIL import Image, ImageOps
 
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import os
+import re
 import subprocess
 
 
-# def make_prediction(image_fp):
-#     im = cv2.imread(image_fp)  # load image
-#     plt.imshow(im[:, :, [2, 1, 0]])
-#     img = image.load_img(image_fp, target_size=(256, 256))
-#     img = image.img_to_array(img)
-#
-#     image_array = img / 255.  # scale the image
-#     img_batch = np.expand_dims(image_array, axis=0)
-#
-#     class_ = ["Gravel", "Sand", "Silt"]  # possible output values
-#     predicted_value = class_[model.predict(img_batch).argmax()]
-#     true_value = re.search(r'(Gravel)|(Sand)|(Silt)', image_fp)[0]
-#
-#     out = f"""Predicted Soil Type: {predicted_value}
-#     True Soil Type: {true_value}
-#     Correct?: {predicted_value == true_value}"""
-#
-#     return out
+UPLOAD_FOLDER = '/home/leber/PycharmProjects/soil_care_api/uploads'
+
+MODEL_FILES = [
+    'soiltype',
+]
+
+
+def ph_model(model_path):
+
+    print(model_path)
+
+    return keras.models.load_model(filepath=model_path)
+
+def load_image_batch(image_fp):
+
+    im = cv2.imread(image_fp)  # load image
+    plt.imshow(im[:, :, [2, 1, 0]])
+    img = keras.preprocessing.image.load_img(image_fp, target_size=(256, 256))
+    img = keras.preprocessing.image.img_to_array(img)
+
+    image_array = img / 255.  # scale the image
+
+    return np.expand_dims(image_array, axis=0)
+
+
+def make_predictions(image_fp):
+
+    img_batch = load_image_batch(image_fp)
+
+    predictions = {}
+
+    for model_path in MODEL_FILES:
+
+        try:
+            model = ph_model(
+                'model/' + model_path + '.h5'
+            )
+
+            prediction = model.predict(img_batch)
+
+            predictions[model_path] = prediction.tolist()
+
+        except Exception as e:
+            print('*********** exception')
+            print(e)
+            pass
+
+    return predictions
 
 
 def remove_background(image, bg_color=255):
