@@ -17,6 +17,6 @@ class User(db.Model):
         return self.authenticated
 
 
-class Soil(db.Model):
-
-    user_id = db.Column(db.String)
+# class Soil(db.Model):
+#
+#     user_id = db.Column(db.String)
