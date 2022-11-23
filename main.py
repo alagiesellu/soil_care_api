@@ -1,6 +1,10 @@
 import os
+
+import numpy
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
+
+from predictor import prepare_image
 
 
 UPLOAD_FOLDER = '/home/leber/PycharmProjects/soil_care_api/uploads'
@@ -27,8 +31,15 @@ def predict():
         flash('No selected file')
         return redirect(request.url)
     if file and allowed_file(file.filename):
+
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        file_data = file.read()
+
+        image_data, image = prepare_image(file_data)
+
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
         return redirect(
             '/'
         )
