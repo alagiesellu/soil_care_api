@@ -79,7 +79,7 @@ def remove_background(image, bg_color=255):
 def prepare_image(file_data):
 
     # convert string data to numpy array
-    file_bytes = numpy.fromstring(file_data, numpy.uint8)
+    file_bytes = np.fromstring(file_data, np.uint8)
 
     # convert numpy array to image
     img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)

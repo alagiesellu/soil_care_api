@@ -30,7 +30,7 @@ def save_file(file):
 
         date = datetime.now()
 
-        filename = str(date) . secure_filename(file.filename)
+        filename = str(date) + secure_filename(file.filename)
 
         file_data = file.read()
 
