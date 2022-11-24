@@ -1,25 +1,90 @@
-import tensorflow
-import tensorflow as tf
 from tensorflow import keras
-from keras.preprocessing import image
-from PIL import Image, ImageOps
+from PIL import Image
 
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-import os
-import re
-import subprocess
 
+from vendors.graphic import getH, getS, getV
 
 UPLOAD_FOLDER = '/home/leber/PycharmProjects/soil_care_api/uploads'
 
-MODEL_FILES = [
-    'soiltype',
+soil_types = [
+    'Gravel',
+    'Sand',
+    'Silt'
 ]
 
 
-def ph_model(model_path):
+def present_soil_type_prediction(predictions):
+    highest_index = 0
+
+    predictions = predictions[0]
+
+    for i, confidence in enumerate(predictions):
+
+        if predictions[highest_index] < confidence:
+            highest_index = i
+
+    return {
+        'type': soil_types[highest_index],
+        'confidence': predictions[highest_index],
+    }
+
+def present_ph_prediction(prediction):
+    return prediction
+
+def prepare_soil_type_data(prediction):
+    return prediction
+
+def prepare_ph_data(prediction):
+
+    print('************** color-prediction')
+    print(len(prediction))
+
+    color = np.mean(prediction, axis=(0, 1))
+
+    color = {
+        'r': color[0],
+        'g': color[1],
+        'b': color[2],
+    }
+
+    color['h'] = getH(color['r'], color['g'], color['b'])
+    color['s'] = getS(color['r'], color['g'], color['b'])
+    color['v'] = getV(color['r'], color['g'], color['b'])
+
+    color['si1'] = color['r'] / color['g'] / color['b']
+    color['si2'] = color.h / color.s / color.v
+    color['si3'] = color.h / color.s
+    color['si4'] = color.h + color.s
+    color['si5'] = color.h + color.s + color.v
+    color['si6'] = color.s / color.v
+    color['si7'] = color.s + color.v
+    color['si8'] = color['r'] / color['g']
+    color['si9'] = color['r'] + color['g']
+    color['si10'] = color['r'] + color['g'] + color['b']
+    color['si11'] = color['g'] / color['b']
+    color['si12'] = color['g'] + color['b']
+
+    print('************** color')
+    print(len(color))
+
+    return color
+
+
+MODEL_FUNCTIONS = {
+    'soiltype': {
+        'present': present_soil_type_prediction,
+        'prepare': prepare_soil_type_data,
+    },
+    'ph': {
+        'present': present_ph_prediction,
+        'prepare': prepare_ph_data,
+    },
+}
+
+def load_model(model_path):
 
     print(model_path)
 
@@ -43,16 +108,23 @@ def make_predictions(image_fp):
 
     predictions = {}
 
-    for model_path in MODEL_FILES:
+    for model_path, model_function in MODEL_FUNCTIONS.items():
 
         try:
-            model = ph_model(
+
+            input_data = model_function['prepare'](img_batch)
+
+            model = load_model(
                 'model/' + model_path + '.h5'
             )
 
-            prediction = model.predict(img_batch)
+            prediction = model.predict(input_data)
 
-            predictions[model_path] = prediction.tolist()
+            data = model_function['present'](prediction.tolist())
+
+            predictions[model_path] = data
+
+
 
         except Exception as e:
             print('*********** exception')

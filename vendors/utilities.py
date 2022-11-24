@@ -3,6 +3,7 @@ import os
 from flask import abort
 from vendors.predictor import prepare_image
 from werkzeug.utils import secure_filename
+import uuid
 
 
 ALLOWED_EXTENSIONS = {
@@ -12,8 +13,11 @@ ALLOWED_EXTENSIONS = {
 }
 
 
-UPLOAD_FOLDER = '/home/leber/PycharmProjects/soil_care_api/uploads'
+UPLOAD_FOLDER = 'uploads'
 
+
+def get_file():
+    return
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -28,9 +32,7 @@ def save_file(file):
 
     if file and allowed_file(file.filename):
 
-        date = datetime.now()
-
-        filename = str(date) + secure_filename(file.filename)
+        filename = str(uuid.uuid4()) + secure_filename(file.filename)
 
         file_data = file.read()
 
